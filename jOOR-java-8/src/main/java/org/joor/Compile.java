@@ -34,7 +34,6 @@ import javax.tools.FileObject;
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaCompiler.CompilationTask;
-import javax.tools.JavaFileManager;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
@@ -49,28 +48,21 @@ class Compile {
 
     static Class<?> compile(String className, String content, CompileOptions compileOptions) {
 
-        Lookup lookup = MethodHandles.lookup();
-        ClassLoader classLoader = lookup.lookupClass().getClassLoader();
-
-        return compile(className, content, compileOptions, classLoader);
-    }
-
-    static Class<?> compile(String className, String content, CompileOptions compileOptions, ClassLoader cl) {
+        ClassLoader classLoader = compileOptions.getClassLoader();
 
         try {
-            return cl.loadClass(className);
-        }
-        catch (ClassNotFoundException ignore) {
+            return classLoader.loadClass(className);
+        } catch (ClassNotFoundException ignore) {
             JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
             try {
                 ClassFileManager fileManager = new ClassFileManager(compiler.getStandardFileManager(null, null, null));
 
-                List<CharSequenceJavaFileObject> files = new ArrayList<CharSequenceJavaFileObject>();
+                List<CharSequenceJavaFileObject> files = new ArrayList<>();
                 files.add(new CharSequenceJavaFileObject(className, content));
                 StringWriter out = new StringWriter();
 
-                List<String> options = new ArrayList<String>();
+                List<String> options = new ArrayList<>();
                 StringBuilder classpath = new StringBuilder();
                 String separator = System.getProperty("path.separator");
                 String prop = System.getProperty("java.class.path");
@@ -78,8 +70,8 @@ class Compile {
                 if (prop != null && !"".equals(prop))
                     classpath.append(prop);
 
-                if (cl instanceof URLClassLoader) {
-                    for (URL url : ((URLClassLoader) cl).getURLs()) {
+                if (classLoader instanceof URLClassLoader) {
+                    for (URL url : ((URLClassLoader) classLoader).getURLs()) {
                         if (classpath.length() > 0)
                             classpath.append(separator);
 
@@ -104,7 +96,7 @@ class Compile {
                 // This works if we have private-access to the interfaces in the class hierarchy
                 if (Reflect.CACHED_LOOKUP_CONSTRUCTOR != null) {
                     byte[] b = fileManager.o.getBytes();
-                    result = Reflect.on(cl).call("defineClass", className, b, 0, b.length).get();
+                    result = Reflect.on(classLoader).call("defineClass", className, b, 0, b.length).get();
                 }
 
                 return result;

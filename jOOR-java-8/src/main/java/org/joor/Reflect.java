@@ -88,7 +88,7 @@ public class Reflect {
      * @throws ReflectException if anything went wrong compiling the class.
      */
     public static Reflect compile(String name, String content, ClassLoader classLoader) throws ReflectException {
-        return compile(name, content, new CompileOptions(), classLoader);
+        return compile(name, content, new CompileOptions(classLoader));
     }
 
     /**
@@ -114,21 +114,6 @@ public class Reflect {
      */
     public static Reflect compile(String name, String content, CompileOptions options) throws ReflectException {
         return on(Compile.compile(name, content, options));
-    }
-
-    /**
-     * Compile a class at runtime and reflect on it.
-     * <p>
-     *
-     * @param name The qualified class name
-     * @param content The source code for the class
-     * @param options compiler options
-     * @param classLoader The classloader used to compile
-     * @return A wrapped {@link Class}
-     * @throws ReflectException if anything went wrong compiling the class.
-     */
-    public static Reflect compile(String name, String content, CompileOptions options, ClassLoader classLoader) throws ReflectException {
-        return on(Compile.compile(name, content, options, classLoader));
     }
 
     /* [/java-8] */

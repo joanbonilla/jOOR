@@ -13,6 +13,7 @@
  */
 package org.joor;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 
 /* [java-8] */
@@ -28,11 +29,15 @@ import javax.annotation.processing.Processor;
 public final class CompileOptions {
 
     final List<? extends Processor> processors;
+    private ClassLoader classLoader = MethodHandles.lookup().lookupClass().getClassLoader();
 
     public CompileOptions() {
-        this(
-            Collections.emptyList()
-        );
+        this(Collections.emptyList());
+    }
+
+    public CompileOptions(ClassLoader classLoader) {
+        this(Collections.emptyList());
+        this.classLoader = classLoader;
     }
 
     private CompileOptions(List<? extends Processor> processors) {
@@ -45,6 +50,10 @@ public final class CompileOptions {
 
     public CompileOptions processors(List<? extends Processor> processors) {
         return new CompileOptions(processors);
+    }
+
+    public ClassLoader getClassLoader(){
+        return this.classLoader;
     }
 }
 /* [/java-8] */
