@@ -48,8 +48,14 @@ import javax.tools.ToolProvider;
 class Compile {
 
     static Class<?> compile(String className, String content, CompileOptions compileOptions) {
+
         Lookup lookup = MethodHandles.lookup();
-        ClassLoader cl = lookup.lookupClass().getClassLoader();
+        ClassLoader classLoader = lookup.lookupClass().getClassLoader();
+
+        return compile(className, content, compileOptions, classLoader);
+    }
+
+    static Class<?> compile(String className, String content, CompileOptions compileOptions, ClassLoader cl) {
 
         try {
             return cl.loadClass(className);
@@ -101,44 +107,6 @@ class Compile {
                     result = Reflect.on(cl).call("defineClass", className, b, 0, b.length).get();
                 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 return result;
             }
             catch (ReflectException e) {
@@ -153,7 +121,7 @@ class Compile {
     static final class JavaFileObject extends SimpleJavaFileObject {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-        JavaFileObject(String name, JavaFileObject.Kind kind) {
+        JavaFileObject(String name, Kind kind) {
             super(URI.create("string:///" + name.replace('.', '/') + kind.extension), kind);
         }
 
@@ -176,7 +144,7 @@ class Compile {
 
         @Override
         public JavaFileObject getJavaFileForOutput(
-            JavaFileManager.Location location,
+            Location location,
             String className,
             JavaFileObject.Kind kind,
             FileObject sibling
@@ -189,7 +157,7 @@ class Compile {
         final CharSequence content;
 
         public CharSequenceJavaFileObject(String className, CharSequence content) {
-            super(URI.create("string:///" + className.replace('.', '/') + JavaFileObject.Kind.SOURCE.extension), JavaFileObject.Kind.SOURCE);
+            super(URI.create("string:///" + className.replace('.', '/') + Kind.SOURCE.extension), Kind.SOURCE);
             this.content = content;
         }
 
